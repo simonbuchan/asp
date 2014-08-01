@@ -32,12 +32,13 @@ rbracket = -lbracket,
 };
 
 extern int as3lineno;
+extern char* as3text;
 
 struct token {
     int line = as3lineno;
     Tok tok = Tok::none;
     Op op = Op::none;
-    std::string text;
+    std::string text = as3text;
 
     token(Tok tok) : tok(tok) {}
     token(Op op) : tok(Tok::op), op(op) {}

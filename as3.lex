@@ -31,7 +31,7 @@ token::token(Tok tok, std::string text)
 #undef YY_DECL
 #define YY_DECL token as3lex()
 
-#define yyterminate() Tok::end
+#define yyterminate() return Tok::error
 
 %}
 
@@ -41,7 +41,7 @@ UTF8BOM \xEF\xBB\xBF
 LineTerminator \r|\n|\r\n
 InputCharacter [^\r\n]
 
-WhiteSpace {LineTerminator}|{UTF8BOM}|[:space:]+
+WhiteSpace {LineTerminator}|{UTF8BOM}|[[:space:]]+
 
 /* comments */
 TraditionalComment "/*"([^*]|"*"[^/])+"*/"
@@ -92,7 +92,8 @@ SingleCharacter [^\r\n\'\\]
 break|case|continue|default|do|while|else|for|each|in|if|label|return |
 super|switch|throw|try|catch|finally|with|dynamic|final|internal|native |
 override|private|protected|public|static|class|const|extends|function|get |
-implements|interface|namespace|package|set|var|import|include|use|false|null|this|true { return Tok::keyword; }
+implements|interface|namespace|package|set|var|import|include|use |
+false|null|this|true           { return Tok::keyword; }
 
     /* operators */
 
@@ -247,5 +248,6 @@ implements|interface|namespace|package|set|var|import|include|use|false|null|thi
 }
 
     /* error fallback */
-<*>.|\n                        error("invalid char: '%s'", yytext);
+<*>.|\n                        error("invalid char: %x", *yytext);
+<<EOF>>                        { return Tok::end; }
 
