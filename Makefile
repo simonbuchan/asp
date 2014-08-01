@@ -7,6 +7,6 @@ $(OUTDIR)/Makefile : configure
 
 .DEFAULT_GOAL := .DEFAULT
 
-.DEFAULT:
+.DEFAULT: $(OUTDIR)/Makefile
 	@make -C $(OUTDIR) --no-print-directory $(MAKECMDGOALS)
 
