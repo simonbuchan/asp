@@ -1,6 +1,3 @@
-# output
-/as3
-
-# Build files
-/.build/
+# Default output directory
+/out
 

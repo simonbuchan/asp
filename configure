@@ -1,0 +1,24 @@
+#!/bin/bash
+# Make sure we don't screw up generated makefile
+# vim: noexpandtab indentexpr=
+
+set -e
+
+SRCDIR=$(dirname ${BASH_SOURCE[0]})
+SRCDIR=$(cd $SRCDIR && pwd)
+echo "Building from $SRCDIR"
+
+if [[ $(pwd) == $SRCDIR ]]
+then
+	OUTDIR=out
+	echo "WARNING: Current directory is source directory"
+	echo "WARNING: Changing directory to '$OUTDIR'"
+	echo "WARNING: You can build with 'make -C $OUTDIR'"
+	mkdir -p $OUTDIR && cd $OUTDIR
+fi
+
+echo "Building into $(pwd)"
+
+echo >  Makefile '_any .DEFAULT:'
+echo >> Makefile "	@make -f $SRCDIR/build.mk --no-print-directory \$(MAKECMDGOALS)"
+
