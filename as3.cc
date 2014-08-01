@@ -29,9 +29,9 @@ const char* tok_name(Tok tok) {
 
 int main() {
     while (token t = as3lex()) {
-        printf("%d: %s %d: %s\n",
-                t.line, tok_name(t.tok),
-                t.op, t.text.c_str());
+        printf("%d: %s", t.line, tok_name(t.tok));
+        if (t.op != Op::none) printf(" %d", t.op);
+        printf(": %s\n", t.text.c_str());
     }
 }
 
