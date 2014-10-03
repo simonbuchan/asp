@@ -25,11 +25,11 @@ void error(const char* msg, ...) {
     fprintf(stderr, "\n");
 }
 
-token::token(Tok tok, std::string text)
+Token::Token(Tok tok, std::string text)
     : tok(tok), text(move(text)) {}
 
 #undef YY_DECL
-#define YY_DECL token as3lex()
+#define YY_DECL Token as3lex()
 
 #define yyterminate() return Tok::error
 
@@ -246,7 +246,7 @@ with                           return Tok::keyword;
 {XMLEndTag}                 { token_text += yytext;
                              if (!--xml_depth) {
                                  BEGIN(INITIAL);
-                                 return token(Tok::xml, move(token_text));
+                                 return Token(Tok::xml, move(token_text));
                              }
                             }
 .                           { token_text += yytext; }
@@ -258,7 +258,7 @@ with                           return Tok::keyword;
 \"                          {
                                  BEGIN(INITIAL);
                                  // length also includes the trailing quote
-                                 return token(Tok::string, move(token_text));
+                                 return Token(Tok::string, move(token_text));
                             }
 
 {StringCharacter}+             |
@@ -277,7 +277,7 @@ with                           return Tok::keyword;
 \'                             {
                                  BEGIN(INITIAL);
                                  // length also includes the trailing quote
-                                 return token(Tok::string, move(token_text));
+                                 return Token(Tok::string, move(token_text));
                                }
 
 {SingleCharacter}+             |

@@ -20,7 +20,7 @@ def assert_equal(expected, actual):
     expected: {!r}
     actual:   {!r}""".format(expected, actual))
 
-def assert_equal_udiff(expected, actual):
+def assert_equal_udiff(expected, actual, message=None):
     if expected != actual:
         if not isinstance(expected, str) or not isinstance(actual, str):
             assert_equal(expected, actual)
@@ -31,30 +31,49 @@ def assert_equal_udiff(expected, actual):
                 fromfile='expected',
                 tofile='actual')
         diff = '\n'.join(diff)
-        raise AssertionError("Assertion failed. diff:\n{}".format(diff))
+        raise AssertionError("{}. diff:\n{}".format(message or "not equal to expected", diff))
 
-def run_test(path):
-    print('./as3 {}.in..'.format(path))
-    test_in = try_read(path+'.in')
-    expected_out = try_read(path+'.out')
-    expected_err = try_read(path+'.err')
-    PIPE = subprocess.PIPE
-    p = subprocess.Popen('./as3', stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    actual_out, actual_err = p.communicate(input=test_in)
-    assert_equal_udiff(expected_out or '', actual_out or '')
-    assert_equal_udiff(expected_err or '', actual_err or '')
-    print('  OK')
+def run_test(mode, path):
+    desc = 'as3 {} {}'.format(mode, path)
+    try:
+        test_in = try_read(path+'.in')
+        expected_out = try_read(path+'.out')
+        expected_err = try_read(path+'.err')
 
-def run_as3_tests(root):
+        PIPE = subprocess.PIPE
+        p = subprocess.Popen(['./as3', mode], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+        actual_out, actual_err = p.communicate(input=test_in)
+
+        assert_equal_udiff(
+                expected_out or '', actual_out or '', 
+                "stdout not equal to expected")
+        assert_equal_udiff(
+                expected_err or '', actual_err or '',
+                "stderr not equal to expected")
+    except Exception as e:
+        print('- FAIL {}'.format(desc))
+        print('-' * 40)
+        print(e)
+        print('-' * 40)
+        print('- input:')
+        print(test_in)
+        print('-' * 40)
+        print('- output:')
+        print(actual_out)
+        print('-' * 40)
+        print('- error:')
+        print(actual_err)
+    else:
+        print('- OK {}'.format(desc))
+
+def run_as3_tests(mode, root):
     for path in glob.glob(os.path.join(root, '*.in')):
-        run_test(os.path.splitext(path)[0])
+        run_test(mode, os.path.splitext(path)[0])
 
 def run_all_tests():
-    try:
-        root = os.path.join(TESTS_ROOT, 'as3')
-        run_as3_tests(root)
-    except Exception as e:
-        print(e)
+    run_as3_tests('--lex', os.path.join(TESTS_ROOT, 'lex'))
+    run_as3_tests('--expression', os.path.join(TESTS_ROOT, 'expr'))
 
 if __name__ == '__main__':
     run_all_tests()

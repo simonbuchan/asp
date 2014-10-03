@@ -1,68 +1,57 @@
 #include "as3.lex.hh"
+#include "parse.hh"
 
 #include <stdio.h>
+#include <string>
 
-const char* tok_name(Tok tok) {
-    switch (tok) {
-        default:
-            return "[unknown tok]";
-        case Tok::end:
-            return "end";
-        case Tok::none:
-            return "none";
-        case Tok::keyword:
-            return "keyword";
-        case Tok::identifier:
-            return "identifier";
-        case Tok::op:
-            return "op";
-        case Tok::number:
-            return "number";
-        case Tok::comment:
-            return "comment";
-        case Tok::string:
-            return "string";
-        case Tok::xml:
-            return "xml";
+using namespace std::literals;
+
+void print_lex();
+void print_parse(Parse parse);
+
+void usage() {
+    exit(1);
+}
+
+int main(int argc, const char* argv[]) {
+    if (argc < 2) {
+        usage();
+    } else if (argv[1] == "--lex"s) {
+        print_lex();
+    } else if (argv[1] == "--expression"s) {
+        print_parse(parse_expression);
+    } else if (argv[1] == "--statement"s) {
+        print_parse(parse_statement);
+    } else if (argv[1] == "--package"s) {
+        print_parse(parse_package);
+    } else if (argv[1] == "--parse"s) {
+        print_parse(parse_file);
+    } else {
+        usage();
     }
 }
 
-const char* op_name(Op op) {
-    switch (op) {
-        default:
-            return "[unknown op]";
-        case Op::none:
-            return "none";
-        case Op::lparen:
-            return "lparen";
-        case Op::rparen:
-            return "rparen";
-        case Op::lcurly:
-            return "lcurly";
-        case Op::rcurly:
-            return "rcurly";
-        case Op::lsquare:
-            return "lsquare";
-        case Op::rsquare:
-            return "rsquare";
-        case Op::colon:
-            return "colon";
-        case Op::semicolon:
-            return "semicolon";
-        case Op::equal:
-            return "equal";
-        case Op::plus:
-            return "plus";
-    }
-}
-
-int main() {
-    while (token t = as3lex()) {
-        printf("%d: %s", t.line, tok_name(t.tok));
-        if (t.op != Op::none) {
-            printf(" %s", op_name(t.op));
+void print_lex() {
+    while (auto token = as3lex()) {
+        printf("%d: %s", token.line, tok_name(token.tok));
+        if (token.op != Op::none) {
+            printf(" %s", op_name(token.op));
         }
-        printf(" '%s'\n", t.text.c_str());
+        printf(" '%s'\n", token.text.c_str());
     }
+}
+
+void print_node(const Node& node) {
+    printf("(%s", node.head.text.c_str());
+    for (auto&& child : node.children) {
+        printf(" ");
+        print_node(child);
+    }
+    printf(")");
+}
+
+void print_parse(Parse parse) {
+    auto node = parse();
+    print_node(node);
 }
 

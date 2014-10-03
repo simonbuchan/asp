@@ -11,7 +11,10 @@ LEX = flex
 CXXFLAGS += -g --std=c++1y -I$(SRCDIR)
 
 PROGRAM = as3
-SOURCES = as3.cc as3.lex.cc
+SOURCES += as3.cc
+SOURCES += as3.lex.cc
+SOURCES += tok.cc op.cc
+SOURCES += parse.cc
 OBJECTS = $(SOURCES:.cc=.o)
 DEPENDS = $(SOURCES:.cc=.d)
 
