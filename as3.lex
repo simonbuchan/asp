@@ -89,47 +89,89 @@ SingleCharacter [^\r\n\'\\]
 
 <INITIAL>{
 
-break|case|continue|default|do|while|else|for|each|in|if|label|return |
-super|switch|throw|try|catch|finally|with|dynamic|final|internal|native |
-override|private|protected|public|static|class|const|extends|function|get |
-implements|interface|namespace|package|set|var|import|include|use |
-false|null|this|true           { return Tok::keyword; }
+break |
+case |
+catch |
+class |
+const |
+continue |
+default |
+do |
+dynamic |
+each |
+else |
+extends |
+false |
+final |
+finally |
+for |
+function |
+get |
+if |
+implements |
+import |
+in |
+include |
+interface |
+internal |
+label |
+namespace |
+native |
+null |
+override |
+package |
+private |
+protected |
+public |
+return |
+set |
+static |
+super |
+switch |
+this |
+throw |
+true |
+try |
+use |
+var |
+while |
+with                           return Tok::keyword;
 
     /* operators */
 
-"("                            { return Op::lparen; }
-")"                            { return Op::rparen; }
-"{"                            { return Op::lcurly; }
-"}"                            { return Op::rcurly; }
-"["                            { return Op::lbracket; }
-"]"                            { return Op::rbracket; }
-";"                            |
-","                            |
-"..."                          |
-"."                            |
-"="                            |
-">"                            |
-"<"                            |
-"!"                            |
-"~"                            |
-"?"                            |
-":"                            |
-"=="                           |
-"<="                           |
-">="                           |
-"!="                           |
-"&&"                           |
-"||"                           |
-"++"                           |
-"--"                           |
-"+"                            |
-"-"                            |
-"*"                            |
-"/"                            |
-"&"                            |
-"|"                            |
-"^"                            |
-"%"                            |
+"("                            return Op::lparen;
+")"                            return Op::rparen;
+"{"                            return Op::lcurly;
+"}"                            return Op::rcurly;
+"["                            return Op::lsquare;
+"]"                            return Op::rsquare;
+";"                            return Op::semicolon;
+","                            return Op::comma;
+"..."                          return Op::ellipsis;
+"."                            return Op::dot;
+"="                            return Op::equal;
+">"                            return Op::rangle;
+"<"                            return Op::langle;
+"!"                            return Op::boolnot;
+"~"                            return Op::bitnot;
+"?"                            return Op::question;
+":"                            return Op::colon;
+"=="                           return Op::equalequal;
+"<="                           return Op::langleequal;
+">="                           return Op::rangleequal;
+"!="                           return Op::boolnotequal;
+"&&"                           return Op::booland;
+"||"                           return Op::boolor;
+"++"                           return Op::plusplus;
+"--"                           return Op::minusminus;
+"+"                            return Op::plus;
+"-"                            return Op::minus;
+"*"                            return Op::mul;
+"/"                            return Op::div;
+"&"                            return Op::bitand_;
+"|"                            return Op::bitor_;
+"^"                            return Op::bitxor;
+"%"                            return Op::mod;
 "<<"                           |
 ">>"                           |
 ">>>"                          |
@@ -152,7 +194,7 @@ false|null|this|true           { return Tok::keyword; }
 "new"                          |
 "typeof"                       |
 "void"                         |
-"@"                            { return Tok::op; }
+"@"                            return Op::none;
 
     /* string literal */
 \"                             {
