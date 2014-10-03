@@ -1,0 +1,5 @@
+1: number '1'
+1: op plus '+'
+1: number '2'
+1: op equal '='
+1: number '3'

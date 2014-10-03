@@ -1,0 +1,3 @@
+function functionName(argName:ArgType):ResultType {
+    body;
+}
