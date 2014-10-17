@@ -6,7 +6,7 @@ enum class Tok {
 end = -1,
 none,
 keyword,
-identifier,
+id,
 op,
 number,
 comment,

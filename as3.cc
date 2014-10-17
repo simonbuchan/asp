@@ -53,7 +53,8 @@ void print_node(FILE* file, const Node& node) {
     fprintf(file, "(");
     switch (node.head.tok) {
     default:
-        fprintf(file, "%s", node.head.text.c_str());
+        fprintf(file, "%s %s",
+            tok_name(node.head.tok), node.head.text.c_str());
         break;
     case Tok::op:
         fprintf(file, "%s", op_name(node.head.op));

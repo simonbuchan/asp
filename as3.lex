@@ -243,7 +243,7 @@ with                            RETURN(Tok::keyword);
                                     //xmlTagName = yytext + 1;
                                 }
     /* identifiers */
-{Identifier}                    RETURN(Tok::identifier);
+{Identifier}                    RETURN(Tok::id);
 
 }
 

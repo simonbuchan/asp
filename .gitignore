@@ -1,3 +1,5 @@
 # Default output directory
 /out
 
+# Hidden files hidden by default
+.*

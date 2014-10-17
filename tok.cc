@@ -10,8 +10,8 @@ const char* tok_name(Tok tok) {
             return "none";
         case Tok::keyword:
             return "keyword";
-        case Tok::identifier:
-            return "identifier";
+        case Tok::id:
+            return "id";
         case Tok::op:
             return "op";
         case Tok::number:

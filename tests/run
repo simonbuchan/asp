@@ -78,7 +78,7 @@ def run_test(mode, path):
         print('- OK {}'.format(desc))
 
 def run_as3_tests(mode, root):
-    for path in glob.glob(os.path.join(root, '*.in')):
+    for path in sorted(glob.glob(os.path.join(root, '*.in'))):
         run_test(mode, os.path.splitext(path)[0])
 
 def run_all_tests():

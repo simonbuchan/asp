@@ -30,13 +30,25 @@ Node parse_statement() {
     return Node { };
 }
 
-int binding_power(Op op) {
+enum class Side { left, right };
+
+int left_assoc(int power, Side side) {
+    return power * 2;
+}
+
+int right_assoc(int power, Side side) {
+    return side == Side::right ? power * 2 : power * 2 - 1;
+}
+
+int binding_power(Op op, Side side) {
     switch (op) {
     default: return 0;
+    case Op::equal:
+        return right_assoc(1, side);
     case Op::plus: case Op::minus:
-        return 1;
+        return left_assoc(2, side);
     case Op::mul: case Op::div:
-        return 2;
+        return left_assoc(3, side);
     }
 }
 
@@ -44,9 +56,14 @@ int binding_power(Op op) {
 Node parse_expression(int right_binding_power) {
     auto left = Node { next() };
     auto op = next();
-    while (op.tok == Tok::op && binding_power(op.op) > right_binding_power) {
-        auto right = parse_expression(binding_power(op.op));
-        left = Node { op, { left, right } };
+    while (op.tok == Tok::op &&
+            binding_power(op.op, Side::right) > right_binding_power) {
+        left = Node {
+            op, {
+                left,
+                parse_expression(binding_power(op.op, Side::left))
+            }
+        };
         op = cur();
     }
     return left;
