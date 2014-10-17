@@ -15,6 +15,19 @@
 #include <memory>
 
 using std::move;
+using std::string;
+
+auto make_token(Tok tok) {
+    return Token { yylineno, tok, Op::none, yytext };
+}
+
+auto make_token(Op op) {
+    return Token { yylineno, Tok::op, op, yytext };
+}
+
+auto make_token(Tok tok, string text) {
+    return Token { yylineno, tok, Op::none, move(text) };
+}
 
 void error(const char* msg, ...) {
     fprintf(stderr, "ERROR:%d: ", yylineno);
@@ -24,14 +37,15 @@ void error(const char* msg, ...) {
     va_end(vl);
     fprintf(stderr, "\n");
 }
-
-Token::Token(Tok tok, std::string text)
-    : tok(tok), text(move(text)) {}
+    
+#define RETURN return make_token
 
 #undef YY_DECL
 #define YY_DECL Token as3lex()
 
-#define yyterminate() return Tok::error
+#define yyterminate() RETURN(Tok::error)
+
+#pragma clang diagnostic ignored "-Wdeprecated-register"
 
 %}
 
@@ -135,161 +149,169 @@ try |
 use |
 var |
 while |
-with                           return Tok::keyword;
+with                            RETURN(Tok::keyword);
 
     /* operators */
 
-"("                            return Op::lparen;
-")"                            return Op::rparen;
-"{"                            return Op::lcurly;
-"}"                            return Op::rcurly;
-"["                            return Op::lsquare;
-"]"                            return Op::rsquare;
-";"                            return Op::semicolon;
-","                            return Op::comma;
-"..."                          return Op::ellipsis;
-"."                            return Op::dot;
-"="                            return Op::equal;
-">"                            return Op::rangle;
-"<"                            return Op::langle;
-"!"                            return Op::boolnot;
-"~"                            return Op::bitnot;
-"?"                            return Op::question;
-":"                            return Op::colon;
-"=="                           return Op::equalequal;
-"<="                           return Op::langleequal;
-">="                           return Op::rangleequal;
-"!="                           return Op::boolnotequal;
-"&&"                           return Op::booland;
-"||"                           return Op::boolor;
-"++"                           return Op::plusplus;
-"--"                           return Op::minusminus;
-"+"                            return Op::plus;
-"-"                            return Op::minus;
-"*"                            return Op::mul;
-"/"                            return Op::div;
-"&"                            return Op::bitand_;
-"|"                            return Op::bitor_;
-"^"                            return Op::bitxor;
-"%"                            return Op::mod;
-"<<"                           |
-">>"                           |
-">>>"                          |
-"+="                           |
-"-="                           |
-"*="                           |
-"/="                           |
-"&="                           |
-"|="                           |
-"^="                           |
-"%="                           |
-"<<="                          |
-">>="                          |
-">>>="                         |
-"as"                           |
-"delete"                       |
-"instanceof"                   |
-"is"                           |
-"::"                           |
-"new"                          |
-"typeof"                       |
-"void"                         |
-"@"                            return Op::none;
+"("                             RETURN(Op::lparen);
+")"                             RETURN(Op::rparen);
+"{"                             RETURN(Op::lcurly);
+"}"                             RETURN(Op::rcurly);
+"["                             RETURN(Op::lsquare);
+"]"                             RETURN(Op::rsquare);
+";"                             RETURN(Op::semicolon);
+","                             RETURN(Op::comma);
+"..."                           RETURN(Op::ellipsis);
+"."                             RETURN(Op::dot);
+"="                             RETURN(Op::equal);
+">"                             RETURN(Op::rangle);
+"<"                             RETURN(Op::langle);
+"!"                             RETURN(Op::boolnot);
+"~"                             RETURN(Op::bitnot);
+"?"                             RETURN(Op::question);
+":"                             RETURN(Op::colon);
+"=="                            RETURN(Op::equalequal);
+"<="                            RETURN(Op::langleequal);
+">="                            RETURN(Op::rangleequal);
+"!="                            RETURN(Op::boolnotequal);
+"&&"                            RETURN(Op::booland);
+"||"                            RETURN(Op::boolor);
+"++"                            RETURN(Op::plusplus);
+"--"                            RETURN(Op::minusminus);
+"+"                             RETURN(Op::plus);
+"-"                             RETURN(Op::minus);
+"*"                             RETURN(Op::mul);
+"/"                             RETURN(Op::div);
+"&"                             RETURN(Op::bitand_);
+"|"                             RETURN(Op::bitor_);
+"^"                             RETURN(Op::bitxor);
+"%"                             RETURN(Op::mod);
+"<<"                            |
+">>"                            |
+">>>"                           |
+"+="                            |
+"-="                            |
+"*="                            |
+"/="                            |
+"&="                            |
+"|="                            |
+"^="                            |
+"%="                            |
+"<<="                           |
+">>="                           |
+">>>="                          |
+"as"                            |
+"delete"                        |
+"instanceof"                    |
+"is"                            |
+"::"                            |
+"new"                           |
+"typeof"                        |
+"void"                          |
+"@"                             RETURN(Op::none);
 
     /* string literal */
-\"                             {
-                                  BEGIN(STRING);
-                                  token_text = yytext;
-                               }
+\"                              {
+                                    BEGIN(STRING);
+                                    token_text = yytext;
+                                }
 
     /* character literal */
-\'                             {
-                                  BEGIN(CHARLITERAL);
-                                  token_text = yytext;
-                               }
+\'                              {
+                                    BEGIN(CHARLITERAL);
+                                    token_text = yytext;
+                                }
 
     /* numeric literals */
-{DEC}                          |
-{HEX}                          |
-{OCT}                          |
-{DoubleLiteral}                |
-{DoubleLiteral}[dD]            { return Tok::number; }
+{DEC}                           |
+{HEX}                           |
+{OCT}                           |
+{DoubleLiteral}                 |
+{DoubleLiteral}[dD]             RETURN(Tok::number);
 
     /* JavaDoc comments need a state so that we can highlight the @ controls */
 
     /* comments */
-{Comment}                      { return Tok::comment; }
+{Comment}                       RETURN(Tok::comment);
 
     /* whitespace */
-{WhiteSpace}                   { }
-{XMLBeginTag}                  {  BEGIN(XMLSTARTTAG);
-                                  token_text = yytext;
-                                  xml_depth++;
-                                  //xmlTagName = yytext + 1;
-                               }
+{WhiteSpace}                    ;
+{XMLBeginTag}                   {
+                                    BEGIN(XMLSTARTTAG);
+                                    token_text = yytext;
+                                    xml_depth++;
+                                    //xmlTagName = yytext + 1;
+                                }
     /* identifiers */
-{Identifier}                   { return Tok::identifier; }
+{Identifier}                    RETURN(Tok::identifier);
 
 }
 
 <XMLSTARTTAG>{
 
-{XMLAttribute}              { token_text += yytext; }
-{WhiteSpace}                { token_text += yytext; }
-">"                         { token_text += yytext; BEGIN(XML); }
+{XMLAttribute}                  token_text += yytext;
+{WhiteSpace}                    token_text += yytext;
+">"                             {
+                                    token_text += yytext;
+                                    BEGIN(XML);
+                                }
 
 }
 
 <XML>{
 
-{XMLBeginTag}               { ++xml_depth; token_text += yytext; BEGIN(XMLSTARTTAG); }
-{XMLEndTag}                 { token_text += yytext;
-                             if (!--xml_depth) {
-                                 BEGIN(INITIAL);
-                                 return Token(Tok::xml, move(token_text));
-                             }
-                            }
-.                           { token_text += yytext; }
+{XMLBeginTag}                   {
+                                    ++xml_depth;
+                                    token_text += yytext;
+                                    BEGIN(XMLSTARTTAG);
+                                }
+{XMLEndTag}                     {
+                                    token_text += yytext;
+                                    if (!--xml_depth) {
+                                        BEGIN(INITIAL);
+                                        RETURN(Tok::xml, move(token_text));
+                                    }
+                                }
+.                               token_text += yytext;
 
 }
 
 <STRING>{
 
-\"                          {
-                                 BEGIN(INITIAL);
-                                 // length also includes the trailing quote
-                                 return Token(Tok::string, move(token_text));
-                            }
+\"                              {
+                                    BEGIN(INITIAL);
+                                    // length also includes the trailing quote
+                                    RETURN(Tok::string, move(token_text));
+                                }
 
-{StringCharacter}+             |
+{StringCharacter}+              |
 
-\\[0-3]?{OctDigit}?{OctDigit}  |
+\\[0-3]?{OctDigit}?{OctDigit}   |
 
     /* escape sequences */
-\\.                            { token_text += yytext; }
+\\.                             token_text += yytext;
 
-{LineTerminator}               { BEGIN(INITIAL); }
+{LineTerminator}                BEGIN(INITIAL);
 
 }
 
 <CHARLITERAL>{
 
-\'                             {
-                                 BEGIN(INITIAL);
-                                 // length also includes the trailing quote
-                                 return Token(Tok::string, move(token_text));
-                               }
+\'                              {
+                                    BEGIN(INITIAL);
+                                    // length also includes the trailing quote
+                                    RETURN(Tok::string, move(token_text));
+                                }
 
-{SingleCharacter}+             |
+{SingleCharacter}+              |
 
     /* escape sequences */
 
-\\.                            { token_text += yytext; }
-{LineTerminator}               { BEGIN(INITIAL);  }
+\\.                             token_text += yytext;
+{LineTerminator}                BEGIN(INITIAL);
 
 }
 
     /* error fallback */
-<*>.|\n                        error("invalid char: %x", *yytext);
-<<EOF>>                        { return Tok::end; }
-
+<*>.|\n                         error("invalid char: %x", *yytext);
+<<EOF>>                         RETURN(Tok::end);

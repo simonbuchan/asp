@@ -26,5 +26,11 @@ const char* op_name(Op op) {
             return "equal";
         case Op::plus:
             return "plus";
+        case Op::minus:
+            return "minus";
+        case Op::mul:
+            return "mul";
+        case Op::div:
+            return "div";
     }
 }

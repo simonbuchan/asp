@@ -20,18 +20,23 @@ def assert_equal(expected, actual):
     expected: {!r}
     actual:   {!r}""".format(expected, actual))
 
-def assert_equal_udiff(expected, actual, message=None):
+def assert_equal_udiff(expected, actual, message=None,
+                       expectedfile="expected", actualfile="actual"):
     if expected != actual:
         if not isinstance(expected, str) or not isinstance(actual, str):
             assert_equal(expected, actual)
-        diff = difflib.unified_diff(
+        diff = list(difflib.unified_diff(
                 expected.splitlines(),
                 actual.splitlines(),
                 lineterm='',
-                fromfile='expected',
-                tofile='actual')
+                fromfile=expectedfile,
+                tofile=actualfile))
+        if not expected.endswith('\n'):
+            diff.append('\ No newline at end of {}'.format(expectedfile))
+        if not actual.endswith('\n'):
+            diff.append('\ No newline at end of {}'.format(actualfile))
         diff = '\n'.join(diff)
-        raise AssertionError("{}. diff:\n{}".format(message or "not equal to expected", diff))
+        raise AssertionError("{}\n{}".format(message or "Assertion failed.", diff))
 
 def run_test(mode, path):
     desc = 'as3 {} {}'.format(mode, path)
@@ -45,25 +50,30 @@ def run_test(mode, path):
 
         actual_out, actual_err = p.communicate(input=test_in)
 
-        assert_equal_udiff(
-                expected_out or '', actual_out or '', 
-                "stdout not equal to expected")
-        assert_equal_udiff(
-                expected_err or '', actual_err or '',
-                "stderr not equal to expected")
+        assert_equal_udiff(expected_out or '',
+                           actual_out or '', 
+                           message="Incorrect stdout output",
+                           expectedfile=path+'.out',
+                           actualfile='STDOUT')
+        assert_equal_udiff(expected_err or '',
+                           actual_err or '',
+                           message="Incorrect stderr output",
+                           expectedfile=path+'.err',
+                           actualfile='STDERR')
     except Exception as e:
         print('- FAIL {}'.format(desc))
-        print('-' * 40)
+        print('*' * 20 + ' ERROR ' + '*' * 21)
         print(e)
-        print('-' * 40)
-        print('- input:')
-        print(test_in)
-        print('-' * 40)
-        print('- output:')
-        print(actual_out)
-        print('-' * 40)
-        print('- error:')
-        print(actual_err)
+        if test_in:
+            print('*' * 20 + ' STDIN ' + '*' * 21)
+            print(test_in)
+        if actual_out:
+            print('*' * 20 + ' STDOUT ' + '*' * 20)
+            print(actual_out)
+        if actual_err:
+            print('*' * 20 + ' STDERR ' + '*' * 20)
+            print(actual_err)
+        print('*' * 48)
     else:
         print('- OK {}'.format(desc))
 

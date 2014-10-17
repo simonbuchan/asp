@@ -5,7 +5,7 @@ vpath %.lex.cc $(CURDIR)
 
 all :
 
-CXX = g++
+CXX = clang++
 LEX = flex
 
 CXXFLAGS += -g --std=c++1y -I$(SRCDIR)

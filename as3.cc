@@ -31,27 +31,52 @@ int main(int argc, const char* argv[]) {
     }
 }
 
+void print_token(FILE* file, const Token& token) {
+    fprintf(file, "%d: %s", token.line, tok_name(token.tok));
+    if (token.op != Op::none) {
+        fprintf(file, " %s", op_name(token.op));
+    }
+    fprintf(file, " '%s'\n", token.text.c_str());
+}
+
 void print_lex() {
     while (auto token = as3lex()) {
-        printf("%d: %s", token.line, tok_name(token.tok));
-        if (token.op != Op::none) {
-            printf(" %s", op_name(token.op));
-        }
-        printf(" '%s'\n", token.text.c_str());
+        print_token(stdout, token);
     }
 }
 
-void print_node(const Node& node) {
-    printf("(%s", node.head.text.c_str());
-    for (auto&& child : node.children) {
-        printf(" ");
-        print_node(child);
+void print_node(FILE* file, const Node& node) {
+    if (node.head.tok == Tok::number) {
+        fprintf(file, "%s", node.head.text.c_str());
+        return;
     }
-    printf(")");
+    fprintf(file, "(");
+    switch (node.head.tok) {
+    default:
+        fprintf(file, "%s", node.head.text.c_str());
+        break;
+    case Tok::op:
+        fprintf(file, "%s", op_name(node.head.op));
+        break;
+    }
+    for (auto&& child : node.children) {
+        fprintf(file, " ");
+        print_node(file, child);
+    }
+    fprintf(file, ")");
 }
 
 void print_parse(Parse parse) {
     auto node = parse();
-    print_node(node);
+    print_node(stdout, node);
+    fprintf(stdout, "\n");
+    auto any_unparsed = false;
+    while (auto token = as3lex()) {
+        if (!any_unparsed) {
+            fprintf(stderr, "UNPARSED:\n");
+            any_unparsed = true;
+        }
+        print_token(stderr, token);
+    }
 }
 

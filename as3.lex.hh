@@ -6,18 +6,11 @@
 
 #include <string>
 
-extern int as3lineno;
-extern char* as3text;
-
 struct Token {
-    int line = as3lineno;
+    int line = 0;
     Tok tok = Tok::none;
     Op op = Op::none;
-    std::string text = as3text;
-
-    Token(Tok tok) : tok(tok) {}
-    Token(Op op) : tok(Tok::op), op(op) {}
-    Token(Tok tok, std::string text);
+    std::string text;
 
     explicit operator bool() { return tok > Tok::none; }
 };
@@ -25,4 +18,3 @@ struct Token {
 Token as3lex();
 
 #endif
-
