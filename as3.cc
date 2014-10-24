@@ -54,7 +54,8 @@ void print_node(FILE* file, const Node& node) {
     switch (node.head.tok) {
     default:
         fprintf(file, "%s %s",
-            tok_name(node.head.tok), node.head.text.c_str());
+            tok_name(node.head.tok),
+            node.head.text.c_str());
         break;
     case Tok::op:
         fprintf(file, "%s", op_name(node.head.op));
@@ -71,13 +72,11 @@ void print_parse(Parse parse) {
     auto node = parse();
     print_node(stdout, node);
     fprintf(stdout, "\n");
-    auto any_unparsed = false;
-    while (auto token = as3lex()) {
-        if (!any_unparsed) {
-            fprintf(stderr, "UNPARSED:\n");
-            any_unparsed = true;
-        }
-        print_token(stderr, token);
+    if (cur().tok != Tok::end) {
+        fprintf(stderr, "UNPARSED:\n");
+        do {
+            print_token(stderr, cur());
+        } while (next().tok != Tok::end);
     }
 }
 

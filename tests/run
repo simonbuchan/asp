@@ -84,6 +84,7 @@ def run_as3_tests(mode, root):
 def run_all_tests():
     run_as3_tests('--lex', os.path.join(TESTS_ROOT, 'lex'))
     run_as3_tests('--expression', os.path.join(TESTS_ROOT, 'expr'))
+    run_as3_tests('--statement', os.path.join(TESTS_ROOT, 'stmt'))
 
 if __name__ == '__main__':
     run_all_tests()

@@ -14,7 +14,7 @@ PROGRAM = as3
 SOURCES += as3.cc
 SOURCES += as3.lex.cc
 SOURCES += tok.cc op.cc
-SOURCES += parse.cc
+SOURCES += parse.cc parse_expression.cc
 OBJECTS = $(SOURCES:.cc=.o)
 DEPENDS = $(SOURCES:.cc=.d)
 
@@ -42,4 +42,4 @@ test-as3 : as3
 $(DEPENDS) : %.d : %.cc
 	$(CXX) $(CXXFLAGS) -MM -o $@ $<
 
-include $(DEPENDS)
+-include $(DEPENDS)

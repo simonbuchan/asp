@@ -5,6 +5,10 @@
 
 #include <vector>
 
+const Token& cur();
+const Token& next();
+Token eat();
+
 struct Node {
     Token head;
     std::vector<Node> children;
